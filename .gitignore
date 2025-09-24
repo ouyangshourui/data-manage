@@ -1,1 +1,18 @@
-node_modules
+# 编译生成文件
+/target/
+/build/
+/node_modules/
+/.vscode/
+*.log
+*.tmp
+*.bak
+*.swp
+*.class
+*.jar
+*.war
+*.ear
+*.iml
+*.idea
+*.project
+*.settings
+.DS_Store
