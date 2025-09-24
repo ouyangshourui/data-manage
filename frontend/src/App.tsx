@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import logo from './logo.svg';
-import './App.css';
-import { Table } from 'antd';
+import { Card, Row, Col, Typography, Button, Space, Statistic } from 'antd';
+
+const { Title, Text } = Typography;
 
 interface Department {
   id: number;
@@ -10,64 +10,104 @@ interface Department {
   description: string;
 }
 
-function App() {
-  const [departments, setDepartments] = useState<Department[]>([]);
+interface Stats {
+  count: number;
+  lastUpdated: string;
+}
 
-  useEffect(() => {
+const App: React.FC = () => {
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const fetchDepartments = () => {
+    setLoading(true);
     fetch('http://localhost:8080/api/departments')
       .then(response => {
-        console.log('Response status:', response.status);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         return response.json();
       })
-      .then((data: unknown) => {
-        const departments = data as Department[];
-        console.log('Received data:', departments);
-        setDepartments(departments);
-        return departments;
+      .then((data: Department[]) => {
+        setDepartments(data);
+        setLoading(false);
       })
       .catch(error => {
         console.error('Error fetching departments:', error);
-        return [] as Department[];
+        setDepartments([]);
+        setLoading(false);
+      });
+  };
+
+  const fetchStats = () => {
+    setLoading(true);
+    fetch('http://localhost:8080/api/departments/stats')
+      .then(response => response.json())
+      .then(data => {
+        setStats(data);
+        setLoading(false);
       })
-      .then(data => setDepartments(data));
+      .catch(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchDepartments();
   }, []);
 
-  const columns = [
-    {
-      title: '部门名称',
-      dataIndex: 'name',
-      key: 'name',
-    },
-    {
-      title: '部门代码',
-      dataIndex: 'code',
-      key: 'code',
-    },
-    {
-      title: '描述',
-      dataIndex: 'description',
-      key: 'description',
-    },
-  ];
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <header style={{ padding: '20px 0', background: '#282c34', color: 'white' }}>
-        <h1>部门管理系统</h1>
+        <Title level={2} style={{ color: 'white', textAlign: 'center' }}>部门信息展示</Title>
       </header>
       <main style={{ flex: 1, padding: '20px' }}>
-        <Table 
-          dataSource={departments} 
-          columns={columns} 
-          rowKey="id"
-          style={{ width: '100%' }}
-          scroll={{ y: 'calc(100vh - 180px)' }}
-        />
+        <Space direction="vertical" size="large" style={{ width: '100%' }}>
+          <Space>
+            <Button 
+              type="primary" 
+              onClick={fetchDepartments}
+              loading={loading}
+            >
+              刷新部门数据
+            </Button>
+            <Button 
+              onClick={fetchStats}
+              loading={loading}
+            >
+              获取数据统计
+            </Button>
+          </Space>
+
+          {stats && (
+            <Card>
+              <Space size="large">
+                <Statistic title="部门总数" value={stats.count} />
+                <Statistic title="最后更新时间" value={stats.lastUpdated} />
+              </Space>
+            </Card>
+          )}
+
+          <Row gutter={[16, 16]}>
+            {departments.map(dept => (
+              <Col key={dept.id} xs={24} sm={12} md={8} lg={6}>
+                <Card 
+                  title={dept.name}
+                  bordered={false}
+                  style={{ height: '100%' }}
+                >
+                  <Text strong>部门代码: </Text>
+                  <Text>{dept.code}</Text>
+                  <br />
+                  <Text strong>描述: </Text>
+                  <Text>{dept.description}</Text>
+                </Card>
+              </Col>
+            ))}
+          </Row>
+        </Space>
       </main>
     </div>
   );
-}
+};
 
 export default App;
