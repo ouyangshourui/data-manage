@@ -84,7 +84,7 @@ npm install antd @ant-design/charts
 启动开发服务器：
 
 ```bash
-npm run dev  # 或使用 npm start
+npm start  # 启动开发服务器
 ```
 
 ## 访问地址
