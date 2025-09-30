@@ -36,7 +36,11 @@ public class DepartmentController {
             .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
         return stats;
     }
-    
+    /**
+     * 根据部门名称查询部门信息
+     * @param name
+     * @return
+     */
     @GetMapping("/byName")
     public ResponseEntity<?> getDepartmentByName(@RequestParam String name) {
         return departmentRepository.findByName(name)
