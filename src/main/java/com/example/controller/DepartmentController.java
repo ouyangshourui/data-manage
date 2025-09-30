@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.http.ResponseEntity;
 import java.util.List;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -33,5 +35,12 @@ public class DepartmentController {
         stats.put("lastUpdated", LocalDateTime.now()
             .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
         return stats;
+    }
+    
+    @GetMapping("/byName")
+    public ResponseEntity<?> getDepartmentByName(@RequestParam String name) {
+        return departmentRepository.findByName(name)
+            .map(department -> ResponseEntity.ok(department))
+            .orElse(ResponseEntity.notFound().build());
     }
 }
